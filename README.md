@@ -5,7 +5,7 @@ Python library for controlling the Eufy RoboVac 11c.
 ```python
 from robovac.robovac import Robovac
 
-my_robovac = Robovac('MY_IP', 'MY_LOCAL_CODE')
+my_robovac = Robovac('ROBOVAC_IP', 'ROBOVAC_LOCAL_CODE')
 
 # Cleaning modes
 my_robovac.start_auto_clean()
