@@ -29,7 +29,7 @@ def build_robovac_command(mode, command):
     mcu_ota_header_0xa5 = 0xA5
     cmd_data = (mode.value + command.value)
 
-    return bytes([mcu_ota_header_0xa5, mode, command, cmd_data, 0xFA])
+    return bytes([mcu_ota_header_0xa5, mode.value, command.value, cmd_data, 0xFA])
 
 
 class RobovacModes(Enum):
