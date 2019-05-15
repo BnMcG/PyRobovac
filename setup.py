@@ -16,7 +16,8 @@ setuptools.setup(
     install_requires=[
         'protobuf',
         'pycryptodome',
-        'six'
+        'six',
+        'requests'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

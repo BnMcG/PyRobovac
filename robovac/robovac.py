@@ -5,9 +5,47 @@ from Crypto.Cipher import AES
 from typing import Union
 import struct
 from enum import Enum
+import requests
+
 
 _AES_KEY = bytearray([0x24, 0x4E, 0x6D, 0x8A, 0x56, 0xAC, 0x87, 0x91, 0x24, 0x43, 0x2D, 0x8B, 0x6C, 0xBC, 0xA2, 0xC4])
 _AES_IV = bytearray([0x77, 0x24, 0x56, 0xF2, 0xA7, 0x66, 0x4C, 0xF3, 0x39, 0x2C, 0x35, 0x97, 0xE9, 0x3E, 0x57, 0x47])
+
+
+class EufyApiError(Exception):
+    """ Exception raised when there's a problem communicating with the Eufy API """
+
+
+def get_local_code(username: str, password: str, ip_address: str):
+    """
+    Retrieve the local code for a device using the EufyHome account's username and password.
+
+    Based on a similar method in the google/python-lakeside project:
+    https://github.com/google/python-lakeside/blob/c3f2fef2ca35aac49d2271b436c144b1b059aa6a/lakeside/__init__.py#L30
+    """
+    client_id = 'eufyhome-app'
+    client_secret = 'GQCpr9dSp3uQpsOMgJ4xQ'
+
+    login_payload = {'client_id': client_id, 'client_Secret': client_secret, 'email': username, 'password': password}
+    login_request = requests.post("https://home-api.eufylife.com/v1/user/email/login", json=login_payload)
+
+    if login_request.status_code != 200:
+        raise EufyApiError('Could not authenticate with Eufy API. Is your username and password correct?')
+
+    token = login_request.json()['access_token']
+    headers = {'token': token, 'category': 'Home'}
+    devices_request = requests.get('https://home-api.eufylife.com/v1/device/list/devices-and-groups', headers=headers)
+
+    if devices_request.status_code != 200:
+        raise EufyApiError('Could not list devices from Eufy API.')
+
+    devices_from_api = devices_request.json()
+
+    for item in devices_from_api['items']:
+        if 'device' in item and item['device']['wifi']['lan_ip_addr'] == ip_address:
+            return item['device']['local_code']
+
+    raise EufyApiError('Cannot find local code for device with given IP address. Check that the IP address is correct.')
 
 
 def _encrypt(data):
