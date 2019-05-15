@@ -49,9 +49,10 @@ def get_local_code(username: str, password: str, ip_address: str):
 
 
 def _encrypt(data):
+    """ Encrypt data using the Eufy AES key and IV. Handles padding to a 16 byte interval. """
     cipher = AES.new(bytes(_AES_KEY), AES.MODE_CBC, bytes(_AES_IV))
 
-    # Pad to 16 bits for AES CBC
+    # Pad to 16 bytes for AES CBC
     for i in range(16 - (len(data) % 16)):
         data += b'\0'
 
@@ -59,11 +60,13 @@ def _encrypt(data):
 
 
 def _decrypt(data):
+    """ Decrypt data using the Eufy AES key and IV. """
     cipher = AES.new(bytes(_AES_KEY), AES.MODE_CBC, bytes(_AES_IV))
     return cipher.decrypt(data)
 
 
 def _build_robovac_command(mode, command):
+    """ Compile the given mode and command into the bytes data sent to the RoboVac. """
     mcu_ota_header_0xa5 = 0xA5
     cmd_data = (mode.value + command.value)
 
@@ -71,6 +74,8 @@ def _build_robovac_command(mode, command):
 
 
 class RobovacModes(Enum):
+    """ Enum representations of all the possible RoboVac modes. """
+
     WORK = 0xE1
     SET_SPEED = 0xE8
     FIND_ME = 0xEC
@@ -81,6 +86,8 @@ class RobovacModes(Enum):
 
 
 class RobovacCommands(Enum):
+    """ Enum representations of all the possible RoboVac commands. """
+
     AUTO_CLEAN = 0x02
     SINGLE_ROOM_CLEAN = 0x05
     SPOT_CLEAN = 0x01
@@ -98,6 +105,8 @@ class RobovacCommands(Enum):
 
 
 class RobovacStatus:
+    """ Status reported by the RoboVac. """
+
     def __init__(self,
                  find_me,
                  water_tank_status,
@@ -123,6 +132,8 @@ class RobovacStatus:
 class Robovac:
     @staticmethod
     def _parse_local_server_message_from_decrypted_response(decrypted_response):
+        """ Parse a decrypted response into a Protobuf Local Server Message """
+
         # First 2 bytes indicate length of the actual data
         length = struct.unpack("<H", decrypted_response[0:2])[0]
         protobuf_data = decrypted_response[2:length + 2]
@@ -138,9 +149,11 @@ class Robovac:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self) -> None:
+        """ Connect to the RoboVac at the given IP and port """
         self.s.connect((self.ip, self.port))
 
     def get_status(self) -> RobovacStatus:
+        """ Get the status of the RoboVac device (battery level, mode, charging, etc). """
         message = self._build_get_device_status_user_data_message()
         robovac_response = self._send_packet(message, True)
         received_status_bytes = robovac_response.c.usr_data
@@ -158,90 +171,105 @@ class Robovac:
         )
 
     def start_auto_clean(self):
+        """ Tell the RoboVac to start its auto-clean programme. """
         command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.AUTO_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_spot_clean(self):
+        """ Tell the RoboVac to start its spot-clean programme. """
         command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.SPOT_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_edge_clean(self):
+        """ Tell the RoboVac to start its edge-clean programme. """
         command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.EDGE_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_single_room_clean(self):
+        """ Tell the RoboVac to clean a single room. """
         command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.SINGLE_ROOM_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def stop(self):
+        """ Tell the RoboVac to stop cleaning. The RoboVac will not return to its charging base. """
         command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.STOP_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_home(self):
+        """ Tell the RoboVac to return to its charging base. """
         command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.GO_HOME)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_find_me(self):
+        """ Start the 'find me' mode. The RoboVac will repeatedly play a chime. """
         command = _build_robovac_command(RobovacModes.FIND_ME, RobovacCommands.START_RING)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def stop_find_me(self):
+        """ Stop the 'find me' mode. """
         command = _build_robovac_command(RobovacModes.FIND_ME, RobovacCommands.STOP_RING)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def use_normal_speed(self):
+        """ Tell the RoboVac to use the standard fan speed. """
         command = _build_robovac_command(RobovacModes.SET_SPEED, RobovacCommands.SLOW_SPEED)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def use_max_speed(self):
+        """ Tell the RoboVac to use the maximum possible fan speed. """
         command = _build_robovac_command(RobovacModes.SET_SPEED, RobovacCommands.FAST_SPEED)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_forward(self):
+        """ Tell the RoboVac to move forward without vacuuming. """
         command = _build_robovac_command(RobovacModes.GO_FORWARD, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_backward(self):
+        """ Tell the RoboVac to move backward without vacuuming. """
         command = _build_robovac_command(RobovacModes.GO_BACKWARD, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_left(self):
+        """ Tell the RoboVac to turn left without vacuuming. """
         command = _build_robovac_command(RobovacModes.GO_LEFT, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_right(self):
+        """ Tell the RoboVac to turn right without vacuuming. """
         command = _build_robovac_command(RobovacModes.GO_RIGHT, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def _build_command_user_data_message(self, command_payload) -> LocalServerInfo_pb2.LocalServerMessage:
+        """ Build the Protobuf message in which a given command will be sent. """
         magic_number = self._get_magic_number()
         message = LocalServerInfo_pb2.LocalServerMessage()
         message.magic_num = magic_number
@@ -252,6 +280,7 @@ class Robovac:
         return message
 
     def _build_get_device_status_user_data_message(self) -> LocalServerInfo_pb2.LocalServerMessage:
+        """ Build the Protobuf message to get the RoboVac's status. """
         magic_number = self._get_magic_number()
         message = LocalServerInfo_pb2.LocalServerMessage()
         message.localcode = self.local_code
@@ -261,6 +290,7 @@ class Robovac:
         return message
 
     def _get_magic_number(self) -> int:
+        """ Send a ping packet and parse the response in order to retrieve the next magic number."""
         ping = LocalServerInfo_pb2.LocalServerMessage()
         ping.localcode = self.local_code
         ping.magic_num = random.randrange(3000000)
@@ -273,6 +303,12 @@ class Robovac:
     def _send_packet(self,
                      packet: LocalServerInfo_pb2.LocalServerMessage,
                      receive: True) -> Union[None, LocalServerInfo_pb2.LocalServerMessage]:
+        """
+        Send a packet to the RoboVac. This method handles all the required encryption.
+
+        Will attempt to reconnect to the RoboVac if sending a packet fails.
+        :param receive: If true, the packet sent in reply by the RoboVac will be parsed and returned.
+        """
         raw_packet_data = packet.SerializeToString()
         encrypted_packet_data = _encrypt(raw_packet_data)
 
