@@ -25,7 +25,7 @@ def _decrypt(data):
     return cipher.decrypt(data)
 
 
-def build_robovac_command(mode, command):
+def _build_robovac_command(mode, command):
     mcu_ota_header_0xa5 = 0xA5
     cmd_data = (mode.value + command.value)
 
@@ -120,85 +120,85 @@ class Robovac:
         )
 
     def start_auto_clean(self):
-        command = build_robovac_command(RobovacModes.WORK, RobovacCommands.AUTO_CLEAN)
+        command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.AUTO_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_spot_clean(self):
-        command = build_robovac_command(RobovacModes.WORK, RobovacCommands.SPOT_CLEAN)
+        command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.SPOT_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_edge_clean(self):
-        command = build_robovac_command(RobovacModes.WORK, RobovacCommands.EDGE_CLEAN)
+        command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.EDGE_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_single_room_clean(self):
-        command = build_robovac_command(RobovacModes.WORK, RobovacCommands.SINGLE_ROOM_CLEAN)
+        command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.SINGLE_ROOM_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def stop(self):
-        command = build_robovac_command(RobovacModes.WORK, RobovacCommands.STOP_CLEAN)
+        command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.STOP_CLEAN)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_home(self):
-        command = build_robovac_command(RobovacModes.WORK, RobovacCommands.GO_HOME)
+        command = _build_robovac_command(RobovacModes.WORK, RobovacCommands.GO_HOME)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def start_find_me(self):
-        command = build_robovac_command(RobovacModes.FIND_ME, RobovacCommands.START_RING)
+        command = _build_robovac_command(RobovacModes.FIND_ME, RobovacCommands.START_RING)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def stop_find_me(self):
-        command = build_robovac_command(RobovacModes.FIND_ME, RobovacCommands.STOP_RING)
+        command = _build_robovac_command(RobovacModes.FIND_ME, RobovacCommands.STOP_RING)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def use_normal_speed(self):
-        command = build_robovac_command(RobovacModes.SET_SPEED, RobovacCommands.SLOW_SPEED)
+        command = _build_robovac_command(RobovacModes.SET_SPEED, RobovacCommands.SLOW_SPEED)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def use_max_speed(self):
-        command = build_robovac_command(RobovacModes.SET_SPEED, RobovacCommands.FAST_SPEED)
+        command = _build_robovac_command(RobovacModes.SET_SPEED, RobovacCommands.FAST_SPEED)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_forward(self):
-        command = build_robovac_command(RobovacModes.GO_FORWARD, RobovacCommands.MOVE)
+        command = _build_robovac_command(RobovacModes.GO_FORWARD, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_backward(self):
-        command = build_robovac_command(RobovacModes.GO_BACKWARD, RobovacCommands.MOVE)
+        command = _build_robovac_command(RobovacModes.GO_BACKWARD, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_left(self):
-        command = build_robovac_command(RobovacModes.GO_LEFT, RobovacCommands.MOVE)
+        command = _build_robovac_command(RobovacModes.GO_LEFT, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
 
     def go_right(self):
-        command = build_robovac_command(RobovacModes.GO_RIGHT, RobovacCommands.MOVE)
+        command = _build_robovac_command(RobovacModes.GO_RIGHT, RobovacCommands.MOVE)
         message = self._build_command_user_data_message(command)
 
         self._send_packet(message, False)
@@ -242,7 +242,7 @@ class Robovac:
             self.s.send(encrypted_packet_data)
         except:
             self.connect()
-            self.s.send(encrypted_packet_data)
+            self.s.send(encrypted_packet_data )
 
         if not receive:
             return None
