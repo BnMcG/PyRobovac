@@ -39,12 +39,19 @@ my_robovac.get_status()
 
 ## Local code
 The API authenticates with the Robovac using a unique local code.
-This is a 16 character string that's unique to the RoboVac. Currently,
-the easiest way to find this code is to connect to your Android phone via ADB,
-and run Logcat while running the Eufy Home app. 
+This is a 16 character string that's unique to the RoboVac. In order to
+retrieve this code, the Eufy API can be used. The `get_local_code` function
+has been implemented for this purpose
 
-You can then search through the log output for "localcode" to find
-the local code for your device.
+Currently, the IP address provided must match the RoboVac's IP in order
+to find the local code.
+
+### get_local_code
+```python
+from robovac import get_local_code
+my_robovac_local_code = get_local_code(my_eufy_username, my_eufy_password, ip_of_my_robovac)
+```
+
 
 ## Notes & Acknowledgements
 This library can only be used when on the same LAN as the RoboVac.
