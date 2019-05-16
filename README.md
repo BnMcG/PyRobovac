@@ -1,9 +1,12 @@
 # PyRobovac
 Python library for controlling the Eufy RoboVac 11c.
 
+## Requirements
+PyRobovac requires Python 3.6+. All other requirements should be installed by Pip.
+
 ## Usage
 ```python
-from robovac.robovac import Robovac
+from robovac import Robovac
 
 my_robovac = Robovac('ROBOVAC_IP', 'ROBOVAC_LOCAL_CODE')
 
