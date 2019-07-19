@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="robovac",
-    version="0.0.8",
+    version="0.0.9",
     author="BnMcG",
     author_email="ben@bmagee.com",
     description="Python API for communicating with Eufy RoboVac 11c devices",
