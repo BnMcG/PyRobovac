@@ -154,6 +154,7 @@ class Robovac:
         self.s.connect((self.ip, self.port))
 
     def disconnect(self) -> None:
+        """ Attempt to disconnect from the RoboVac. This will fail and log an error if no connection exists """
         try:
             self.s.close()
         except OSError as e:
