@@ -6,6 +6,7 @@ from typing import Union
 import struct
 from enum import Enum
 import requests
+import logging
 
 
 _AES_KEY = bytearray([0x24, 0x4E, 0x6D, 0x8A, 0x56, 0xAC, 0x87, 0x91, 0x24, 0x43, 0x2D, 0x8B, 0x6C, 0xBC, 0xA2, 0xC4])
@@ -151,6 +152,13 @@ class Robovac:
     def connect(self) -> None:
         """ Connect to the RoboVac at the given IP and port """
         self.s.connect((self.ip, self.port))
+
+    def disconnect(self) -> None:
+        """ Attempt to disconnect from the RoboVac. This will fail and log an error if no connection exists """
+        try:
+            self.s.close()
+        except OSError as e:
+            logging.exception(e)
 
     def get_status(self) -> RobovacStatus:
         """ Get the status of the RoboVac device (battery level, mode, charging, etc). """
@@ -314,7 +322,9 @@ class Robovac:
 
         try:
             self.s.send(encrypted_packet_data)
-        except:
+        except Exception as e:
+            logging.exception(e)
+            self.disconnect()
             self.connect()
             self.s.send(encrypted_packet_data )
 
