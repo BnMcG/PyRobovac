@@ -151,6 +151,7 @@ class Robovac:
 
     def connect(self) -> None:
         """ Connect to the RoboVac at the given IP and port """
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((self.ip, self.port))
 
     def disconnect(self) -> None:
